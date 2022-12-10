@@ -1,0 +1,57 @@
+C:\Users\00516C744>docker cp Downloads\episodeIV_dialouges.txt 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:/
+
+C:\Users\00516C744>docker cp Downloads\episodeV_dialouges.txt 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:/
+
+C:\Users\00516C744>docker cp Downloads\episodeVI_dialouges.txt 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:/
+
+root@7444154d5952:/# hadoop fs -mkdir /user/phani/piginputfiles
+root@7444154d5952:/# hadoop fs -put episode* /user/phani/piginputfiles/
+root@7444154d5952:/# hadoop fs -ls /user/phani/piginputfiles/
+Found 3 items
+-rw-r--r--   1 root supergroup      68681 2022-12-10 09:00 /user/phani/piginputfiles/episodeIV_dialouges.txt
+-rw-r--r--   1 root supergroup      44332 2022-12-10 09:00 /user/phani/piginputfiles/episodeVI_dialouges.txt
+-rw-r--r--   1 root supergroup      50730 2022-12-10 09:00 /user/phani/piginputfiles/episodeV_dialouges.txt
+
+root@7444154d5952:/# vi pigProject_EpisodeIV.pig
+pigInputFile = LOAD 'hdfs:///user/phani/piginputfiles/episodeIV_dialouges.txt' USING PigStorage('\t') AS (character:chararray,dialogue:chararray);
+groupByCharacter = GROUP pigInputFile BY character;
+dialogueCount = FOREACH groupByCharacter GENERATE $0 as character, COUNT($1) as noOfLines;
+orderedDialogueCount = ORDER dialogueCount BY noOfLines DESC;
+STORE orderedDialogueCount INTO 'hdfs:///user/phani/EpisodeIVDialogueCount/dialogueCount' USING PigStorage('\t');
+
+root@7444154d5952:/# vi pigProject_EpisodeV.pig
+pigInputFile = LOAD 'hdfs:///user/phani/piginputfiles/episodeV_dialouges.txt' USING PigStorage('\t') AS (character:chararray,dialogue:chararray);
+groupByCharacter = GROUP pigInputFile BY character;
+dialogueCount = FOREACH groupByCharacter GENERATE $0 as character, COUNT($1) as noOfLines;
+orderedDialogueCount = ORDER dialogueCount BY noOfLines DESC;
+STORE orderedDialogueCount INTO 'hdfs:///user/phani/EpisodeVDialogueCount/dialogueCount' USING PigStorage('\t');
+
+root@7444154d5952:/# vi pigProject_EpisodeVI.pig
+pigInputFile = LOAD 'hdfs:///user/phani/piginputfiles/episodeVI_dialouges.txt' USING PigStorage('\t') AS (character:chararray,dialogue:chararray);
+groupByCharacter = GROUP pigInputFile BY character;
+dialogueCount = FOREACH groupByCharacter GENERATE $0 as character, COUNT($1) as noOfLines;
+orderedDialogueCount = ORDER dialogueCount BY noOfLines DESC;
+STORE orderedDialogueCount INTO 'hdfs:///user/phani/EpisodeVIDialogueCount/dialogueCount' USING PigStorage('\t');
+
+
+root@7444154d5952:/# pig pigProject_EpisodeIV.pig
+root@7444154d5952:/# pig pigProject_EpisodeV.pig
+root@7444154d5952:/# pig pigProject_EpisodeVI.pig
+
+C:\Users\00516C744>docker cp 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:pigProject_EpisodeIV.pig .\
+C:\Users\00516C744>docker cp 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:pigProject_EpisodeV.pig .\
+C:\Users\00516C744>docker cp 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:pigProject_EpisodeVI.pig .\
+
+
+root@7444154d5952:/# hadoop fs -get hdfs:///user/phani/EpisodeIVDialogueCount/dialogueCount/part-r-00000
+C:\Users\00516C744>docker cp 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:EpisodeIVDialogueCount/part-r-00000 .\
+C:\Users\00516C744>rename part-r-00000 EpisodeIVDialogues_Output.txt
+
+root@7444154d5952:/# hadoop fs -get hdfs:///user/phani/EpisodeVDialogueCount/dialogueCount/part-r-00000
+C:\Users\00516C744>docker cp 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:EpisodeVDialogueCount/part-r-00000 .\
+C:\Users\00516C744>rename part-r-00000 EpisodeVDialogues_Output.txt
+
+root@7444154d5952:/# hadoop fs -get hdfs:///user/phani/EpisodeVIDialogueCount/dialogueCount/part-r-00000
+C:\Users\00516C744>docker cp 7444154d5952ae321508279122240879125448bf89c7a12de0f5815f3dc55f73:EpisodeVIDialogueCount/part-r-00000 .\
+C:\Users\00516C744>rename part-r-00000 EpisodeVIDialogues_Output.txt
+
