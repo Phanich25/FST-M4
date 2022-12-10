@@ -1,0 +1,21 @@
+hive> CREATE TABLE files (line STRING);
+
+hive> LOAD DATA LOCAL INPATH '/file01.txt' INTO TABLE files;
+Loading data to table default.files
+OK
+Time taken: 0.917 seconds
+
+hive> CREATE TABLE word_counts AS
+    >  SELECT word, count(1) AS count FROM
+    >  (SELECT explode(split(line, ' ')) AS word FROM files) w
+    >  GROUP BY word
+    >  ORDER BY word;
+
+hive> select * from word_counts;
+OK
+Bye     1
+Hello   1
+World   2
+Time taken: 0.101 seconds, Fetched: 3 row(s)
+	
+ 
