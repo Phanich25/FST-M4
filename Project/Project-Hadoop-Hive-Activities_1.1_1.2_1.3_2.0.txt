@@ -1,13 +1,19 @@
+#creating the tables.
+
 hive> CREATE TABLE episodeIVdialogues
     > (character STRING, line String)
     >  ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
     >  TBLPROPERTIES ("skip.header.line.count"="2");
+OK
+Time taken: 0.074 seconds
+
 hive> CREATE TABLE episodeVdialogues
     > (character STRING, line String)
     >  ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
     >  TBLPROPERTIES ("skip.header.line.count"="2");
 OK
 Time taken: 0.074 seconds
+
 hive> CREATE TABLE episodeVIdialogues
     > (character STRING, line String)
     >  ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
@@ -15,23 +21,56 @@ hive> CREATE TABLE episodeVIdialogues
 OK
 Time taken: 0.057 seconds
 
+#Loading the data.
+
 hive> LOAD DATA LOCAL INPATH '/episodeIV_dialouges.txt' INTO TABLE episodeIVdialogues;
 Loading data to table default.episodeivdialogues
 OK
 Time taken: 1.333 seconds
+
 hive> LOAD DATA LOCAL INPATH '/episodeV_dialouges.txt' INTO TABLE episodeVdialogues;
 Loading data to table default.episodevdialogues
 OK
 Time taken: 0.193 seconds
+
 hive> LOAD DATA LOCAL INPATH '/episodeVI_dialouges.txt' INTO TABLE episodeVIdialogues;
 Loading data to table default.episodevidialogues
 OK
 Time taken: 0.158 seconds
 
-hive> SELECT character, COUNT(line) AS NoOfLines FROM episodeIVdialogues GROUP BY character ORDER BY NoOfLines DESC;
+#running the query and copying the results to HDFS / Local file system.
 
-hive> SELECT character, COUNT(line) AS NoOfLines FROM episodeVdialogues GROUP BY character ORDER BY NoOfLines DESC;
+hive> INSERT OVERWRITE DIRECTORY '/user/phani/EpisodeIVDialogueCount'
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+    > SELECT character, COUNT(line) AS NoOfLines FROM episodeIVdialogues GROUP BY character ORDER BY NoOfLines DESC;
 
-hive> SELECT character, COUNT(line) AS NoOfLines FROM episodeVIdialogues GROUP BY character ORDER BY NoOfLines DESC;
+hive> INSERT OVERWRITE DIRECTORY '/user/phani/EpisodeVDialogueCount'
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+    > SELECT character, COUNT(line) AS NoOfLines FROM episodeVdialogues GROUP BY character ORDER BY NoOfLines DESC;
+
+hive> INSERT OVERWRITE DIRECTORY '/user/phani/EpisodeVIDialogueCount'
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+    > SELECT character, COUNT(line) AS NoOfLines FROM episodeVIdialogues GROUP BY character ORDER BY NoOfLines DESC;
+
+hive> INSERT OVERWRITE LOCAL DIRECTORY '/EpisodeIVDialogueCount'
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+    > SELECT character, COUNT(line) AS NoOfLines FROM episodeIVdialogues GROUP BY character ORDER BY NoOfLines DESC;
+
+hive> INSERT OVERWRITE LOCAL DIRECTORY '/EpisodeVDialogueCount'
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+    > SELECT character, COUNT(line) AS NoOfLines FROM episodeVdialogues GROUP BY character ORDER BY NoOfLines DESC;
+
+hive> INSERT OVERWRITE LOCAL DIRECTORY '/EpisodeVIDialogueCount'
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+    > SELECT character, COUNT(line) AS NoOfLines FROM episodeVIdialogues GROUP BY character ORDER BY NoOfLines DESC;
+
+hive> INSERT OVERWRITE DIRECTORY '/user/phani/EpisodeIVDialogueCountLuke'
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+    > SELECT character, COUNT(line) AS NoOfLines FROM episodeIVdialogues where line like '%Luke%' GROUP BY character ORDER BY NoOfLines DESC;
+
+hive> INSERT OVERWRITE LOCAL DIRECTORY '/EpisodeIVDialogueCountLuke'
+    > ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+    > SELECT character, COUNT(line) AS NoOfLines FROM episodeIVdialogues where line like '%Luke%' GROUP BY character ORDER BY NoOfLines DESC;
 
 hive> select count(*) from episodeIVdialogues where line like '%Luke%';
+
